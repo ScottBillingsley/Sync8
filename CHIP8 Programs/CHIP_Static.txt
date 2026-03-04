@@ -1,0 +1,162 @@
+#---EDITOR---
+;	CHIP Static
+;  Draw random pixels on the screen
+;  Vernon Billingsley c2026
+;  Sync 8
+# Registers
+6000	; Temp
+6100	; Pixel X
+6200	; Pixel Y
+6300	; Direction
+6400	; Temp X
+6500	; Temp Y
+6600	; [AUTO] LD V6, 00
+6700	; [AUTO] LD V7, 00
+6800	; [AUTO] LD V8, 00
+6902	; Load timer register 2
+1296	; Jump to program
+# Timer
+F915	; [AUTO] LD DT, V9
+F807	; LD V0, DT
+4800	; SNE V0, 00
+00EE	; RET
+1218	; Loop while timer
+# Data
+8000	; Single pixel data
+# Screen Setup
+; Draw border
+00E0	; [AUTO] CLS
+6100	; [AUTO] LD V1, 00
+6200	; [AUTO] LD V2, 00
+A220	; [AUTO] LD I, 220
+D121	; Draw pixel
+7101	; Add 1 to X
+313F	; Skip next if X = 3F
+122A	; [AUTO] JP 22A
+D121	; [AUTO] DRW V1, V2, 1
+7201	; [AUTO] ADD V2, 01
+321F	; [AUTO] SE V2, 1F
+1232	; [AUTO] JP 234
+D121	; [AUTO] DRW V1, V2, 1
+71FF	; [AUTO] ADD V1, FF
+3100	; [AUTO] SE V1, 00
+123A	; [AUTO] JP 23A
+D121	; [AUTO] DRW V1, V2, 1
+72FF	; [AUTO] ADD V2, FF
+3200	; [AUTO] SE V2, 01
+1242	; [AUTO] JP 242
+00EE	; [AUTO] RET
+# Random Direction
+; Return direction in v0
+; 0 = Up    1 = Down
+; 2 = Left  3 = Right
+C303	; [AUTO] V0 = RND & 03
+00EE	; [AUTO] RET
+# X Border Check
+; Input v4 pixel X
+; Output v0 0 = Good, 1 = Redo
+6000	; Clr v0
+4400	; [AUTO] SNE V1, 00
+6001	; [AUTO] LD V0, 01
+4401	; [AUTO] SNE V1, 01
+6001	; [AUTO] LD V0, 01
+443E	; [AUTO] SNE V1, 1E
+6001	; [AUTO] LD V0, 01
+443F	; [AUTO] SNE V1, 1F
+6001	; [AUTO] LD V0, 01
+3001	; [AUTO] SNE V0, 01
+6000	; [AUTO] LD V0, 00
+00EE	; [AUTO] RET
+# Y Border Check
+; Input v5 pixel Y
+; Output v0 0 = Good, 1 = Redo
+6000	; Clr v0
+4500	; [AUTO] SNE V1, 00
+6001	; [AUTO] LD V0, 01
+4501	; [AUTO] SNE V1, 01
+6001	; [AUTO] LD V0, 01
+451E	; [AUTO] SNE V1, 1E
+6001	; [AUTO] LD V0, 01
+451F	; [AUTO] SNE V1, 1F
+6001	; [AUTO] LD V0, 01
+3001	; [AUTO] SNE V0, 01
+6000	; [AUTO] LD V0, 00
+00EE	; [AUTO] RET
+# Random Start
+; Random start X
+C43F	; [AUTO] V1 = RND & 3F
+2250	; Check Border
+3000	; [AUTO] SE V0, 00
+1280	; Get new X
+8140	; [AUTO] LD V1, V4
+; Random start Y
+C51F	; [AUTO] V2 = RND & 1F
+2268    ; Check Border
+3000	; [AUTO] SE V0, 00
+1288	; Get new Y
+8250	; [AUTO] LD V2, V5
+00EE	; [AUTO] RET
+# Program
+2222	; Setup screen
+2280	; Get random start
+D121	; Draw pixel
+;
+2216	; Call timer
+224C	; Get a random direction
+; Jump Direction
+4300	; != 0
+12AE	; [AUTO] JP 300
+4301	; != 1
+12BC	; [AUTO] JP 300
+4302	; != 2
+12CA	; [AUTO] JP 300
+12D8	; == 3	
+# Up
+; Y -1
+8520	; Load Y  to Y temp
+75FF	; [AUTO] ADD V5, FF
+2268	; Border Check Y
+3000	; [AUTO] SE V0, 00
+129E	; Get new direction
+8250	; Load Y temp to Y
+129A	; Draw Pixel
+# Down
+; Y +1
+8520	; Load Y to Y temp
+7501	; [AUTO] ADD V5, 01
+2268	; Border Check Y
+3000	; [AUTO] SE V0, 00
+129E	; Get new direction
+8250	; Load Y temp to Y
+129A	; Draw Pixel
+# Left
+; X -1
+8410	; Load X to X temp
+74FF	; [AUTO] ADD V4, FF
+2250	; Border Check X
+3000	; [AUTO] SE V0, 00
+129E	; Get new direction
+8140	; Load X temp to X
+129A	; Draw Pixel
+# Right
+; X +1
+8410	; Load X to X temp
+7401	; [AUTO] ADD V4, 01
+2250	; Border Check X
+3000	; [AUTO] SE V0, 00
+129E	; Get new direction
+8140	; Load X temp to X
+129A	; Draw Pixel
+12E6
+#---SCRATCH---
+v0 = temp
+v1 = Pixel X
+v2 = Pixel Y
+v3 = Direction
+     0 = Up   1 = Down
+     2 = Left 3 = Right
+
+v4 = Temp X
+v5 = Temp Y
+
+v9 = Timer 2

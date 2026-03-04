@@ -1,0 +1,138 @@
+#---EDITOR---
+;	Rocket
+; A rewrite of a program from 1978 Byte Magazine
+; Vernon Billingsley c2026
+; Sync-8
+# Registers
+6000	; [AUTO] LD V0, 00
+6100	; [AUTO] LD V1, 00
+6200	; [AUTO] LD V2, 00
+6338	; [AUTO] LD V3, 38
+641B	; [AUTO] LD V4, 1B
+6500	; [AUTO] LD V5, 00
+6608	; [AUTO] LD V6, 08
+6700	; [AUTO] LD V7, 00
+681A	; [AUTO] LD V8, 1A
+6902	; [AUTO] LD V9, 02
+6A00	; [AUTO] LD VA, 00
+6B00	; [AUTO] LD VB, 00
+6C00	; [AUTO] LD VC, 00
+6D00	; [AUTO] LD VD, 00
+1270	; Jump to program
+# Timer
+F915	; [AUTO] LD DT, V9
+F007	; LD V0, DT
+4000	; SNE V0, 00
+00EE	; RET
+1220	; Loop while timer
+# Data
+70A8	; Data
+7000	; Data
+2070	; Data
+70F8	; Data
+D888	; Data
+0000	; Font Data
+0000	; Font Data
+# Display Score
+A232	; BCD Store
+F133	; Store BCD of v1
+A234	; Last digit
+F065	; v0 = digit
+F029	; i = font address
+D345	; Display font
+00EE	; [AUTO] RET
+# Display UFO
+A228	; [AUTO] LD I, 228
+D563	; [AUTO] DRW V5, V6, 3
+8A50	; Copy UFO X
+8B60	; Copy UFO Y
+00EE	; [AUTO] RET
+# Erase UFO
+A228	; [AUTO] LD I, 228
+DAB3	; [AUTO] DRW VA, VB, 3
+00EE	; [AUTO] RET
+# Display Rocket
+A22C	; [AUTO] LD I, 22C
+D786	; [AUTO] DRW V7, V8, 6
+8C70	; [AUTO] LD VC, V7
+8D80	; [AUTO] LD VD, V8
+00EE	; [AUTO] RET
+# Erase Rocket
+A22C	; [AUTO] LD I, 22C
+DCD6	; [AUTO] DRW VC, VD, 6
+00EE	; [AUTO] RET
+# Rnd Rocket X
+7201	; Increment rocket count
+681A	; Reset rocket Y
+C71F	; RND X 
+770F	; Add 0xF to avoid score
+6E00	; Clear fired flag
+00EE	; [AUTO] RET
+# Program
+00E0	; [AUTO] CLS
+2236	; Display Score
+2244	; Display UFO
+2264	; Get Rocket X
+2254	; Display Rocket
+; Calculate the next step
+C003	; [AUTO] V0 = RND & 03
+8504	; [AUTO] ADD V5, V0
+224E	; Erase UFO
+2244	; Display UFO
+3F00	; Check for hit, skip nx if not
+12A8	; Jump hit
+600F	; [AUTO] LD V0, 0F
+E0A1	; Skip nx if F !pressed
+6E01	; Set fired flag
+4E00	; Skip nx if fired
+221E	; Call timer
+4E00	; Skip nx if fired
+127A	; [AUTO] JP 27A
+78FF	; Add -1 to Rocket Y
+225E	; Erase Rocket
+4800	; Skip nx if Y != 0
+2264	; If Y0, set new rocket position
+2254	; Display Rocket
+420A	; Fire 10 rockets
+12B6	; End game
+3F00	; Skip next if hit
+12A8	; Jump Hit
+127A	; [AUTO] JP 27A
+# Hit
+225E	; Erase Rocket
+2236	; Erase Score
+7101	; Increment Score
+2236	; Display Score
+6003	; [AUTO] LD V0, 03
+F018	; [AUTO] LD ST, V0
+1276	; Loop
+# End of Game
+12B6
+#---SCRATCH---
+v0 = Temp
+v1 = Score
+v2 = Rocket Count
+v3 = Score X		0x38
+v4 = Score Y		0x1B
+v5 = UFO X
+v6 = UFO Y		0x08
+v7 = Rocket X
+v8 = Rocket Y		0x1A
+v9 = Timer		0x02
+vA = UFO X copy
+vB = UFO Y copy
+vC = Rocket X copy
+vD = Rocket Y copy
+vE = Rocket fired
+
+Timer	i = 0x21E
+Score 	i = 0x236
+UFO on  i = 0x244
+UFO off i = 0x24E
+Rock on i = 0x254
+Rock off i = 0x25E
+
+Data :
+UFO	i = 0x228	 3 byte
+Rocket 	i = 0x22C  6 byte	
+Font	i = 0x232
